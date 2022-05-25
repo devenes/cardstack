@@ -1,0 +1,27 @@
+name: CI [httpbin]
+
+on:
+  push:
+    branches:
+      - httpbin/test-github-actions-role
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  test:
+    name: Test AWS OIDC
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::680542703984:role/httpbin-github-actions
+          aws-region: us-east-1
+
+      - name: list load balancers with containing httpbin in the name
+        run: |
+          aws elbv2 describe-load-balancers --name waypoint-ecs-httpbin
