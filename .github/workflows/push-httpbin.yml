@@ -22,6 +22,6 @@ jobs:
           role-to-assume: arn:aws:iam::680542703984:role/httpbin-github-actions
           aws-region: us-east-1
 
-      - name: list load balancers with containing httpbin in the name
+      - name: describe httpbin load balancer
         run: |
           aws elbv2 describe-load-balancers --name waypoint-ecs-httpbin
