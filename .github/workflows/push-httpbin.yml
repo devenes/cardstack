@@ -28,6 +28,11 @@ jobs:
           sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
           sudo apt-get install awscli waypoint=0.4.0
 
+      - uses: volta-cli/action@v1
+
+      - run: yarn --prefer-offline
+        shell: bash
+
       - name: Deploy httpbin
         run: waypoint up --app=httpbin -prune-retain=0 -plain
         shell: bash
