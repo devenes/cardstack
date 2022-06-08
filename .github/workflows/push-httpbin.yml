@@ -34,7 +34,7 @@ jobs:
         shell: bash
 
       - name: Deploy httpbin
-        run: waypoint up --app=httpbin -prune-retain=0 -plain
+        run: waypoint up --app=httpbin -plain
         shell: bash
         env:
           WAYPOINT_SERVER_TOKEN: ${{ secrets.STAGING_WAYPOINT_SERVER_TOKEN }}
