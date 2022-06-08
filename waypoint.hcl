@@ -446,3 +446,42 @@ app "reward-api" {
     }
   }
 }
+
+app "httpbin" {
+  build {
+    use "docker-pull" {
+      image = "kennethreitz/httpbin"
+      tag   = "latest"
+    }
+
+    registry {
+      use "aws-ecr" {
+        region     = "us-east-1"
+        repository = "httpbin"
+        tag        = "latest"
+      }
+    }
+  }
+
+  deploy {
+    use "aws-ecs" {
+      count               = 2
+      service_port        = 80
+      memory              = "512"
+      region              = "us-east-1"
+      cluster             = "httpbin"
+      subnets             = ["subnet-09a31307760d8ecf2", "subnet-0e6a8dfa5e24daceb"]
+      task_role_name      = "httpbin-ecs-task"
+      execution_role_name = "httpbin-ecs-task-execution"
+
+      alb {
+        certificate = "arn:aws:acm:us-east-1:680542703984:certificate/c914104a-4fe8-483a-adc7-5fd2585535a7"
+      }
+    }
+
+    hook {
+      when    = "after"
+      command = ["node", "./scripts/wait-service-stable.mjs", "httpbin"]
+    }
+  }
+}
