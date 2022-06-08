@@ -1,0 +1,43 @@
+name: Deploy [httpbin]
+
+on:
+  push:
+    branches:
+      - httpbin/test-cs-3984
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::680542703984:role/waypoint
+          aws-region: us-east-1
+
+      - name: Install apt packages including waypoint
+        shell: bash
+        run: |
+          curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+          sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+          sudo apt-get install awscli waypoint=0.4.0
+
+      - name: Deploy httpbin
+        run: waypoint up --app=httpbin -prune-retain=0 -plain
+        shell: bash
+        env:
+          WAYPOINT_SERVER_TOKEN: ${{ secrets.STAGING_WAYPOINT_SERVER_TOKEN }}
+          WAYPOINT_SERVER_ADDR: ${{ secrets.STAGING_WAYPOINT_SERVER_ADDR }}
+          WAYPOINT_SERVER_TLS: "1"
+          WAYPOINT_SERVER_TLS_SKIP_VERIFY: "1"
+
+      - name: Prune dangling resources
+        uses: ./.github/actions/waypoint-prune-dangling-resources
+        with:
+          app: "httpbin"
