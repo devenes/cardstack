@@ -24,15 +24,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
 
-      - run: yarn --prefer-offline
-        shell: bash
-
       - name: Install dependencies
         shell: bash
         run: |
           curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
           sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
-          sudo apt-get install awscli waypoint=${{ inputs.waypoint_version }}
+          sudo apt-get install awscli waypoint=0.4.0
           yarn add hcl2-parser @actions/parser -W --prefer-offline
 
       - name: Set up env
@@ -50,6 +47,7 @@ jobs:
           aws-region: us-east-1
 
       - name: Deploy httpbin
+        id: deploy
         run: waypoint up --app=httpbin -plain
         shell: bash
 
@@ -61,7 +59,7 @@ jobs:
 
       - name: Fetch stopped reason and logs
         id: debug
-        if: ${{ failure() }}
+        if: ${{ failure() && steps.deploy.outcome == 'failure'}}
         uses: ./.github/actions/fetch-stopped-ecs-task
         with:
           app: ssr-web
