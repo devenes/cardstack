@@ -67,6 +67,7 @@ jobs:
           discord-channel: ${{ secrets.DISCORD_CHANNEL }}
 
       - name: Send failure notification to Discord
+        id: notify_stopped_task
         if: ${{ failure() && steps.debug.outputs.has_stopped_task == 'true' }}
         uses: ./.github/actions/discord-message
         with:
@@ -79,7 +80,7 @@ jobs:
             View the logs at ${{ steps.debug.outputs.logs_url }}
 
       - name: Send failure notification to Discord
-        if: ${{ failure() && steps.debug.outputs.has_stopped_task == 'false' }}
+        if: ${{ failure() && steps.notify_stopped_task.conclusion == 'skipped' }}
         uses: ./.github/actions/discord-message
         with:
           token: ${{ secrets.DISCORD_TOKEN }}
