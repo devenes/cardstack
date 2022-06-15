@@ -1,0 +1,91 @@
+name: Deploy [httpbin]
+
+on:
+  push:
+    branches:
+      - httpbin/test-cs-3765
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: volta-cli/action@v1
+
+      - name: Set up yarn cache
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/yarn
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - run: yarn --prefer-offline
+        shell: bash
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+          sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+          sudo apt-get install awscli waypoint=${{ inputs.waypoint_version }}
+          yarn add hcl2-parser @actions/parser -W --prefer-offline
+
+      - name: Set up env
+        run: |
+          echo "AWS_ROLE_ARN=arn:aws:iam::680542703984:role/waypoint" >> $GITHUB_ENV
+          echo "WAYPOINT_SERVER_TOKEN=${{ secrets.STAGING_WAYPOINT_SERVER_TOKEN }}" >> $GITHUB_ENV
+          echo "WAYPOINT_SERVER_ADDR=${{ secrets.STAGING_WAYPOINT_SERVER_ADDR }}" >> $GITHUB_ENV
+          echo "WAYPOINT_SERVER_TLS=1" >> $GITHUB_ENV
+          echo "WAYPOINT_SERVER_TLS_SKIP_VERIFY=1" >> $GITHUB_ENV
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Deploy httpbin
+        run: waypoint up --app=httpbin -plain
+        shell: bash
+
+      - name: Prune dangling resources
+        uses: ./.github/actions/waypoint-prune-dangling-resources
+        with:
+          app: "httpbin"
+          retain: "1"
+
+      - name: Fetch stopped reason and logs
+        id: debug
+        if: ${{ failure() }}
+        uses: ./.github/actions/fetch-stopped-ecs-task
+        with:
+          app: ssr-web
+          discord-token: ${{ secrets.DISCORD_TOKEN }}
+          discord-channel: ${{ secrets.DISCORD_CHANNEL }}
+
+      - name: Send failure notification to Discord
+        if: ${{ failure() && steps.debug.outputs.has_stopped_task == "true" }}
+        uses: ./.github/actions/discord-message
+        with:
+          token: ${{ secrets.DISCORD_TOKEN }}
+          channel: ${{ secrets.DISCORD_CHANNEL }}
+          message: |
+            :warning: **ssr-web** [${{ github.ref }}] has failed to deploy to *${{ github.event.inputs.environment }}*
+            :arrow_forward: Workflow: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            Found stopped tasks: `${{ steps.debug.outputs.stopped_reason }}`
+            View the logs at ${{ steps.debug.outputs.logs_url }}
+
+      - name: Send failure notification to Discord
+        if: ${{ failure() && steps.debug.outputs.has_stopped_task == "false" }}
+        uses: ./.github/actions/discord-message
+        with:
+          token: ${{ secrets.DISCORD_TOKEN }}
+          channel: ${{ secrets.DISCORD_CHANNEL }}
+          message: |
+            :warning: **ssr-web** [${{ github.ref }}] has failed to deploy to *${{ github.event.inputs.environment }}*
+            :arrow_forward: Workflow: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
