@@ -62,7 +62,7 @@ jobs:
         if: ${{ failure() && steps.deploy.outcome == 'failure'}}
         uses: ./.github/actions/fetch-stopped-ecs-task
         with:
-          app: ssr-web
+          app: httpbin
           discord-token: ${{ secrets.DISCORD_TOKEN }}
           discord-channel: ${{ secrets.DISCORD_CHANNEL }}
 
@@ -74,7 +74,7 @@ jobs:
           token: ${{ secrets.DISCORD_TOKEN }}
           channel: ${{ secrets.DISCORD_CHANNEL }}
           message: |
-            :warning: **ssr-web** [${{ github.ref }}] has failed to deploy to *${{ github.event.inputs.environment }}*
+            :warning: **httpbin** [${{ github.ref }}] has failed to deploy to *${{ github.event.inputs.environment }}*
             :arrow_forward: Workflow: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
             Found stopped tasks: `${{ steps.debug.outputs.stopped_reason }}`
             View the logs at ${{ steps.debug.outputs.logs_url }}
@@ -86,5 +86,5 @@ jobs:
           token: ${{ secrets.DISCORD_TOKEN }}
           channel: ${{ secrets.DISCORD_CHANNEL }}
           message: |
-            :warning: **ssr-web** [${{ github.ref }}] has failed to deploy to *${{ github.event.inputs.environment }}*
+            :warning: **httpbin** [${{ github.ref }}] has failed to deploy to *${{ github.event.inputs.environment }}*
             :arrow_forward: Workflow: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
