@@ -80,7 +80,7 @@ jobs:
             View the logs at ${{ steps.debug.outputs.logs_url }}
 
       - name: Send failure notification to Discord
-        if: ${{ failure() && steps.notify_stopped_task.conclusion == 'skipped' }}
+        if: ${{ failure() && steps.notify_stopped_task.conclusion != 'success' }}
         uses: ./.github/actions/discord-message
         with:
           token: ${{ secrets.DISCORD_TOKEN }}
