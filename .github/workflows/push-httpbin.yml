@@ -30,7 +30,7 @@ jobs:
           curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
           sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
           sudo apt-get install awscli waypoint=0.4.0
-          yarn add hcl2-parser @actions/parser -W --prefer-offline
+          yarn add hcl2-parser @actions/core -W --prefer-offline
 
       - name: Set up env
         run: |
