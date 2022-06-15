@@ -7,6 +7,8 @@ try {
 
   const output = main(appName, waypointConfigFilePath);
 
+  console.log(output);
+
   core.setOutput('has_stopped_task', String(output.hasStoppedTask));
   core.setOutput('stopped_reason', output.stoppedReason || '');
   core.setOutput('logs_url', output.logsUrl || '');
