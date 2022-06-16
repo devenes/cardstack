@@ -9,9 +9,9 @@ try {
 
   console.log(output);
 
-  core.setOutput('has_stopped_task', String(output.hasStoppedTask));
-  core.setOutput('stopped_reason', output.stoppedReason || '');
-  core.setOutput('logs_url', output.logsUrl || '');
+  core.setOutput('has_stopped_task', String(output.has_stopped_task));
+  core.setOutput('stopped_reason', output.stopped_reason || '');
+  core.setOutput('logs_url', output.logs_url || '');
 } catch (err) {
   core.setFailed(err.message);
   throw err;
