@@ -516,7 +516,7 @@ app "httpbin" {
   deploy {
     use "aws-ecs" {
       count               = 2
-      service_port        = 81
+      service_port        = 80
       memory              = "512"
       region              = "us-east-1"
       cluster             = "httpbin"
