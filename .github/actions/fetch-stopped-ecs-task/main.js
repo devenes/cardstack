@@ -109,7 +109,7 @@ function main(appName, waypointConfigFilePath) {
   const tasks = getStoppedTasks(config.cluster, services[0].serviceArn);
 
   if (tasks.length === 0) {
-    return { hasStoppedTask: false };
+    return { has_stopped_task: false };
   }
 
   const arnPattern = /^.*\//g;
