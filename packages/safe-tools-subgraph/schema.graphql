@@ -1,0 +1,5 @@
+type Safe @entity {
+  id: ID!
+  owner: Bytes! # address
+  spModule: Bytes! # address
+}

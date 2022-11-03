@@ -1,0 +1,13 @@
+{
+  "name": "safe-tools-subgraph",
+  "scripts": {
+    "codegen": "graph codegen",
+    "build": "graph build",
+    "deploy:goerli": "graph deploy --product hosted-service jurgenwerk/cardstack-safe-tools-goerli",
+    "deploy:mumbai": "graph deploy --product hosted-service jurgenwerk/cardstack-safe-tools-mumbai"
+  },
+  "dependencies": {
+    "@graphprotocol/graph-cli": "0.29.0",
+    "@graphprotocol/graph-ts": "0.26.0"
+  }
+}
